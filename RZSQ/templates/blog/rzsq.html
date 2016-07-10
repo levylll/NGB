@@ -1,0 +1,64 @@
+{% extends "./blog/base.html" %}
+
+{% block main%}
+<div class="row">
+    <div id="vmaig-content">
+        <div class="vmaig-comment-edit clearfix">
+            <form id="vmaig-comment-form" method="post" role="form">
+                {% csrf_token %}
+                <textarea id="comment" name="comment" class="form-control" rows="4" placeholder="请输入信息 限200字!"></textarea>
+                <button type="submit" class="btn pull-right">提交</button>
+            </form>
+        </div>
+    </div>
+    <div class="panel" style="width: 1110px; margin-left: 30px">
+        <ul>
+            {% for comment in comment_list%}
+            <li>
+                <label class="info">
+                    {{comment.create_time|date:"Y-m-d H:i:s" }}
+                </label>
+                <p>
+                    {% autoescape on%}
+                    {{comment.comment}}
+                    {% endautoescape %}
+                </p>
+            </li>
+            {% endfor%}
+        </ul>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block js%}
+<script language="javascript" type="text/javascript">
+
+var buf;
+
+    $('#vmaig-comment-form').submit(function(){
+        buf = $("#comment").val();
+        $.ajax({
+            type:"POST",
+            url: "/rzsq/",
+            data:{"comment":$("#comment").val()},
+
+            beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                location.reload();
+                },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+
+            }
+        });
+        return false;
+    });
+</script>
+{% endblock%}
+
+
+
