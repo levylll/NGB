@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import auth
 from django.contrib.auth.forms import PasswordChangeForm,SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
-from MZXT.models import MzxtCls
+from MZXT.models import FieldCls
 from vmaig_comments.models import Comment
 from vmaig_auth.models import VmaigUser
 from vmaig_auth.forms import VmaigUserCreationForm,VmaigPasswordRestForm
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseMixin(object):
-    
+
     def get_context_data(self,*args,**kwargs):
         context = super(BaseMixin,self).get_context_data(**kwargs)
         return context
@@ -40,22 +40,39 @@ class MzxtView(BaseMixin,ListView):
     template_name = 'blog/mzxt.html'
     context_object_name = 'comment_list'
     def get_context_data(self,**kwargs):
-        #轮播
-        kwargs['comment_list'] = MzxtCls.objects.all()
+        fieldset = FieldCls.objects.all()
+        tablenames = []
+        for elem in fieldset:
+            if elem.tablename not in tablenames:
+                tablenames.append(elem.tablename)
+        kwargs['tablelist'] = tablenames
         return super(MzxtView,self).get_context_data(**kwargs)
 
     def get_queryset(self):
-        comment_list = MzxtCls.objects.all()
-        return comment_list
+        fieldset = FieldCls.objects.all()
+        tablelist = []
+        for elem in fieldset:
+            if elem.tablename not in tablelist:
+                tablelist.append(elem.tablename)
+        return tablelist
 
     def post(self, request, *args, **kwargs):
-        #获取评论
-        valbuf = self.request.POST.get("comment","")
-        #保存评论
-        comment = MzxtCls.objects.create(
-                comment = valbuf
-                )
+        fname = self.request.POST.get('fname')
+        if not fname:
+            sendinfo = self.request.body
+            sendinfo = json.loads(sendinfo)
+            tablename = sendinfo['tablename']
+            rowinfo = sendinfo['rows']
+            time_now = datetime.datetime.now()
+            for row in rowinfo:
+                res = FieldCls.objects.create(  tablename = tablename,\
+                                                field_name = row['name'],\
+                                                field_type = row['type'],\
+                                                create_time = time_now
+                                              )
         # comment_list = MzxtCls.objects.all()
-
-        mydict = {"errors":""}
+        else:
+            res = FieldCls.objects.filter(tablename=fname).delete()
+            print res
+        mydict = {"errors":''}
         return HttpResponse(json.dumps(mydict),content_type="application/json")

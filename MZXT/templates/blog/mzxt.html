@@ -4,23 +4,26 @@
 <div class="row">
     <div id="vmaig-content">
         <div class="vmaig-comment-edit clearfix">
+            <div>
+                <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#myModal">
+                    创建新表
+                </button>
+            </div>
             <form id="vmaig-comment-form" method="post" role="form">
                 {% csrf_token %}
-                <textarea id="comment" name="comment" class="form-control" rows="4" placeholder="请输入信息 限200字!"></textarea>
-                <button  class="btn pull-right">提交</button>
+                <!--<textarea id="comment" name="comment" class="form-control" rows="1" placeholder="请输入信息 限200字!"></textarea>-->
+                表名:  <input type="text" name="fname" autofocus><br>
+                <button type="submit" class="btn">删除</button>
             </form>
         </div>
     </div>
     <div class="panel" style="width: 1110px; margin-left: 30px">
         <ul>
-            {% for comment in comment_list%}
+            {% for tablename in tablelist%}
             <li>
-                <label class="info">
-                    {{comment.create_time|date:"Y-m-d H:i:s" }}
-                </label>
                 <p>
                     {% autoescape on%}
-                    {{comment.comment}}
+                    表名：{{tablename}}
                     {% endautoescape %}
                 </p>
             </li>
@@ -29,22 +32,138 @@
     </div>
 
 </div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+    <div class="modal-dialog" role="document" style="top:200px">
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">创建表格</h4>
+            </div>
+            <div class="modal-body">
+    <div class='container'>
+        <div class='rules'>
+            <a href='/dashboard/user-profile-select-overview/' type='button' class='btn btn-default' style='float: right;'>返回</a>
+            <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1">表名</span>
+                <input type="text" class="table-name" placeholder="表名" aria-describedby="basic-addon1">
+            </div>
+            <div class="row">
+                <div class="col-md-2"><span class="label label-info">字段名称</span></div>
+                <div class="col-md-3"><span class="label label-info">字段类型</span></div>
+            </div>
+            <div class='one-rule'>
+                <div class='row'>
+                    <div class="colname col-md-2"><input type="text" placeholder="colname"></div>
+                    <div class="coltype col-md-2"><select class="selectpicker">
+                    <option>string</option>
+                    <option>int</option>
+                    <option>float</option>
+                </select></div>
+                    <div class="col-md-2"> <button type="button" class="btn btn-warning delete-rule" >删除规则</button></div>
+                </div>
+
+
+
+                <!--<div class='rule-choose row'>-->
+                    <!--<select class='condition col-md-6'>-->
+                        <!--<div>col name</div>-->
+                        <!--<option selected disabled>选择条件</option>-->
+                        <!--{% for condition in condition_list %}-->
+                        <!--<option value={{ condition.condition_id }}>{{ condition.condition_name }}</option>-->
+                        <!--{% endfor %}-->
+                    <!--</select>-->
+
+                <!--</div>-->
+            </div>
+
+        </div>
+        <div class="btn-group" role="group" style='margin-top: 10px;'>
+
+
+        </div>
+    </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary pull-left" onclick='addRule()'>添加字段</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                 <button type="button" class="btn btn-success" onclick='submit()'>提交</button>
+                <!--<button type="button" class="btn btn-primary" id="chgstatus_btn" onclick="chgstatus_btn()">确定</button>-->
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}
 
 {% block js%}
 <script language="javascript" type="text/javascript">
 
-var buf;
-
-    $('#vmaig-comment-form').submit(function(){
-        buf = $("#comment").val();
+    $('#vmaig-comment-form').submit(function(e){
+        buf = $("#fname").val();
         $.ajax({
             type:"POST",
             url: "/mzxt/",
-            data:{"comment":$("#comment").val()},
+            data:$("#vmaig-comment-form").serialize(),
 
-            beforeSend:function(xhr){
+            success:function(data){
+                location.reload();
+                },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+
+            }
+
+        });
+        e.preventDefault();
+    });
+
+    function addRule() {
+            var len = $('.one-rule').length;
+            var last_rule = $($('.one-rule')[len-1]);
+            $('.rules').append(last_rule.clone());
+            last_rule.find('.rule-connection').css('display', 'block');
+
+    }
+    $('body').on('click', '.delete-rule', function() {
+            var one_rule = $('.one-rule').length;
+            if (one_rule == 1) {
+                return;
+            }
+    $(this).parent().parent().parent().remove();
+            var len_rule_connection = $('.rule-connection').length;
+            var last_rule_connection = $($('.rule-connection')[len_rule_connection-1])
+            last_rule_connection.css('display', 'none');
+        });
+
+    function submit() {
+        var rowinfo = [];
+        var rules = $('.one-rule');
+        var len = rules.length;
+        var tablename = $('.table-name').val();
+        var rows = []
+        $.each(rules,function(n,value) {
+            var colname = $(value).find('.row .colname input').val()
+            var coltype = $(value).find('.row .coltype .selectpicker').val()
+            var elem = {"name":colname, "type":coltype}
+            rows.push(elem)
+        })
+        var sendInfo = {
+            "rows": rows,
+            "tablename": tablename}
+        sendInfo = JSON.stringify(sendInfo);
+        console.log(sendInfo);
+        $.ajax({
+                type: "POST",
+                url: "/mzxt/",
+                dataType: "json",
+                data: sendInfo,
+           beforeSend:function(xhr){
                 xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
             },
             success:function(data,textStatus){
@@ -54,10 +173,11 @@ var buf;
                 alert(XMLHttpRequest.responseText);
 
             }
-        });
-        return false;
-    });
+            });
+    }
 </script>
+
+
 {% endblock%}
 
 

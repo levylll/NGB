@@ -2,16 +2,18 @@
 
 {% block main%}
 <div class="row">
-    <div id="vmaig-content">
-        <div class="vmaig-comment-edit clearfix">
-            <form id="vmaig-comment-form" method="post" role="form">
-                {% csrf_token %}
-                <textarea id="comment" name="comment" class="form-control" rows="4" placeholder="请输入信息 限200字!"></textarea>
-                <button type="submit" class="btn pull-right">提交</button>
-            </form>
-        </div>
-    </div>
+    <!--<div id="vmaig-content">-->
+        <!--<div class="vmaig-comment-edit clearfix">-->
+            <!--<form id="vmaig-comment-form" method="post" role="form">-->
+                <!--{% csrf_token %}-->
+                <!--<textarea id="comment" name="comment" class="form-control" rows="4" placeholder="请输入信息 限200字!"></textarea>-->
+                <!--<button type="submit" class="btn pull-right">提交</button>-->
+            <!--</form>-->
+        <!--</div>-->
+    <!--</div>-->
+
     <div class="panel" style="width: 1110px; margin-left: 30px">
+        <h4 style="color: #a10000">日志记录</h4></br>
         <ul>
             {% for comment in comment_list%}
             <li>
