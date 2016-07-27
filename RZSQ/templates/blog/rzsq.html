@@ -7,35 +7,38 @@
             <form id="vmaig-comment-form" method="post" role="form">
                 {% csrf_token %}
                 <!--<textarea id="comment" name="comment" class="form-control" rows="1" placeholder="请输入信息 限200字!"></textarea>-->
-                表名:  <input type="text" name="fname" autofocus><br>
-                <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#myModal">
-                    修改
-                </button>
-                </br>
-                <button type="submit" class="btn">清空表格内容</button>
-                    <select class='tablename'>
-                        <option selected disabled>选择表格</option>
+                表名:
+                    <select id='select-table' onchange="location = this.value;">
+                        <option selected value={{cur_table}}>{{cur_table}}</option>
                         {% for table in table_list %}
-                        <option value={{ table}}>{{ table}}</option>
+                        <option value="/rzsq/{{table}}.html">{{ table}}</option>
                         {% endfor %}
                     </select>
+                </br>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                    添加内容
+                </button>
+                </br>
+                <button type="button" class="btn btn-danger" onclick="cleartable()">清空表格内容</button>
             </form>
+            <div name="mytable">
+                {{cur_table}}
+            </div>
+            <div>
+                {% for rowkey, record in records.items%}
+                <div name={{rowkey}} style='border: 2px solid;; border-radius:25px;'>
+                        {% for field_name, field_content in record.items%}
+                            <div>
+                            <div class="label label-info">{{field_name}}</div>
+                            {{field_content}}
+                            </div>
+                        {%endfor%}
+                        <button type="button" class="btn btn-warning delete-record" onclick="deleteRecord({{ rowkey }})">删除记录</button>
+                    </div>
+                {%endfor%}
+            </div>
         </div>
     </div>
-    <div class="panel" style="width: 1110px; margin-left: 30px">
-        <ul>
-            {% for tablename in tablelist%}
-            <li>
-                <p>
-                    {% autoescape on%}
-                    表名：{{tablename}}
-                    {% endautoescape %}
-                </p>
-            </li>
-            {% endfor%}
-        </ul>
-    </div>
-
 </div>
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
@@ -45,30 +48,25 @@
 
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">创建表格</h4>
+                <h4 class="modal-title" id="myModalLabel">添加内容</h4>
             </div>
             <div class="modal-body">
     <div class='container'>
         <div class='rules'>
-            <a href='/dashboard/user-profile-select-overview/' type='button' class='btn btn-default' style='float: right;'>返回</a>
-            <div class="input-group">
-                <span class="input-group-addon" id="basic-addon1">表名</span>
-                <input type="text" class="table-name" placeholder="表名" aria-describedby="basic-addon1">
-            </div>
-            <div class="row">
-                <div class="col-md-2"><span class="label label-info">字段名称</span></div>
-                <div class="col-md-3"><span class="label label-info">字段类型</span></div>
-            </div>
             <div class='one-rule'>
-                <div class='row'>
-                    <div class="colname col-md-2"><input type="text" placeholder="colname"></div>
-                    <div class="coltype col-md-2"><select class="selectpicker">
-                    <option>string</option>
-                    <option>int</option>
-                    <option>float</option>
-                </select></div>
-                    <div class="col-md-2"> <button type="button" class="btn btn-warning delete-rule" >删除规则</button></div>
-                </div>
+            <div>
+                {% for col in col_list%}
+                    </br>
+                    <div class='one-rule-detail'>
+                            <span class="label label-info">{{col}} </span>
+                            <input type="text" placeholder={{col}} class="label-content">
+                    </div>
+                {% endfor %}
+            </div>
+                    </br>
+                    <div > 
+                        <button type="button" class="btn btn-warning delete-rule" >删除规则</button>
+                    </div>
 
 
 
@@ -113,7 +111,7 @@
         buf = $("#fname").val();
         $.ajax({
             type:"POST",
-            url: "/mzxt/",
+            url: "/rzsq/",
             data:$("#vmaig-comment-form").serialize(),
 
             success:function(data){
@@ -135,6 +133,7 @@
             last_rule.find('.rule-connection').css('display', 'block');
 
     }
+
     $('body').on('click', '.delete-rule', function() {
             var one_rule = $('.one-rule').length;
             if (one_rule == 1) {
@@ -150,24 +149,28 @@
         var rowinfo = [];
         var rules = $('.one-rule');
         var len = rules.length;
-        var tablename = $('.table-name').val();
         var rows = []
+        var table = $("#select-table").find("option:selected").text(); 
         $.each(rules,function(n,value) {
-            var colname = $(value).find('.row .colname input').val()
-            var coltype = $(value).find('.row .coltype .selectpicker').val()
-            var elem = {"name":colname, "type":coltype}
-            rows.push(elem)
+            var details = $(value).find('.one-rule-detail');
+            var row_content = {}
+            $.each(details, function(j, val){
+                var colname = $(val).find('.label-info').text();
+                var content = $(val).find('.label-content').val();
+                row_content[colname] = content
+            });
+            rows.push(row_content)
         })
         var sendInfo = {
             "rows": rows,
-            "tablename": tablename}
+            "tablename": table}
         sendInfo = JSON.stringify(sendInfo);
         console.log(sendInfo);
         $.ajax({
                 type: "POST",
-                url: "/mzxt/",
+                url: "/rzsq/",
                 dataType: "json",
-                data: sendInfo,
+                data: {operate: "add",sendInfo: sendInfo},
            beforeSend:function(xhr){
                 xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
             },
@@ -179,6 +182,44 @@
 
             }
             });
+    }
+    function deleteRecord(rowkey){
+         $.ajax({
+                type: "POST",
+                url: "/rzsq/",
+                dataType: "json",
+                data: {operate:"delete_one",rowkey:rowkey},
+           beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                location.reload();
+                },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+
+            }
+            });
+    }
+    function cleartable(){
+        var table = $("#select-table").find("option:selected").text(); 
+        $.ajax({
+                type: "POST",
+                url: "/rzsq/",
+                dataType: "json",
+                data: {operate:"clear_table",tablename:table},
+           beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                location.reload();
+                },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+
+            }
+            });
+
     }
 </script>
 

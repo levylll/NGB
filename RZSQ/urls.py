@@ -6,4 +6,5 @@ from blog.models import News
 urlpatterns = [
 
         url(r'^rzsq/$',RZSQView.as_view()),
+        url(r'^rzsq/(?P<slug>\w+).html$',RZSQView.as_view()),
 ]

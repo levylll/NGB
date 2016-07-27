@@ -41,3 +41,28 @@ class RzsqCls(models.Model):
     def __unicode__(self):
     # 在Python3中使用 def __str__(self)
         return self.comment
+
+class SeqCls(models.Model):
+    #seq = models.AutoField(primary_key=True)
+    ext = models.TextField(blank=True,null=True,verbose_name=u'备注')
+    create_time = models.DateTimeField(u'创建时间',auto_now_add=True)
+    class Meta:
+        verbose_name_plural = verbose_name = u'序列号管理'
+        ordering = ['-create_time']
+        app_label = string_with_title('RZSQ',u"媒资系统管理")
+
+    def __unicode__(self):
+    # 在Python3中使用 def __str__(self)
+        return str(self.id)
+
+class RecordCls(models.Model):
+    rowkey = models.IntegerField(verbose_name=u'行标')
+    tablename = models.CharField(max_length=20,verbose_name=u'表名')
+    field_name = models.CharField(max_length=20,verbose_name=u'字段名称')
+    content = models.CharField(max_length=80,verbose_name=u'记录内容')
+    ext = models.TextField(blank=True,null=True,verbose_name=u'备注')
+    create_time = models.DateTimeField(u'创建时间',auto_now_add=True)
+    class Meta:
+        verbose_name_plural = verbose_name = u'记录内容管理'
+        ordering = ['-create_time']
+        app_label = string_with_title('RZSQ',u"媒资系统管理")
