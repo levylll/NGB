@@ -49,7 +49,6 @@ INSTALLED_APPS = (
     'MZXT',
 
     'xadmin',
-    'django_extlog',
     'crispy_forms',
     'reversion',
 )
@@ -63,7 +62,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django_extlog.middleware.AuditLoggingMiddleware'
 )
 
 ROOT_URLCONF = 'vmaig_blog.urls'
