@@ -54,7 +54,6 @@
     <div class='container'>
         <div class='rules'>
             <div class='one-rule'>
-            <div>
                 {% for col in col_list%}
                     </br>
                     <div class='one-rule-detail'>
@@ -62,24 +61,9 @@
                             <input type="text" placeholder={{col}} class="label-content">
                     </div>
                 {% endfor %}
-            </div>
-                    </br>
                     <div > 
                         <button type="button" class="btn btn-warning delete-rule" >删除规则</button>
                     </div>
-
-
-
-                <!--<div class='rule-choose row'>-->
-                    <!--<select class='condition col-md-6'>-->
-                        <!--<div>col name</div>-->
-                        <!--<option selected disabled>选择条件</option>-->
-                        <!--{% for condition in condition_list %}-->
-                        <!--<option value={{ condition.condition_id }}>{{ condition.condition_name }}</option>-->
-                        <!--{% endfor %}-->
-                    <!--</select>-->
-
-                <!--</div>-->
             </div>
 
         </div>
@@ -139,7 +123,7 @@
             if (one_rule == 1) {
                 return;
             }
-    $(this).parent().parent().parent().remove();
+    $(this).parent().parent().remove();
             var len_rule_connection = $('.rule-connection').length;
             var last_rule_connection = $($('.rule-connection')[len_rule_connection-1])
             last_rule_connection.css('display', 'none');
