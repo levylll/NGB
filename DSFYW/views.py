@@ -18,7 +18,7 @@ from vmaig_auth.models import VmaigUser
 from vmaig_auth.forms import VmaigUserCreationForm,VmaigPasswordRestForm
 from vmaig_blog.settings import PAGE_NUM
 import datetime,time
-from django_extlog.models import ExtLog
+#from django_extlog.models import ExtLog
 import json
 import logging
 
@@ -56,7 +56,7 @@ class DSFYWView(BaseMixin,ListView):
                 comment = json_input
                 )
         indexed_ts=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print indexed_ts
+       # print indexed_ts
         LogCls.objects.create(
                 app_name = u'第三方业务',
                 add_content = json_input,

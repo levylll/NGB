@@ -12,6 +12,8 @@ from django.contrib import auth
 from django.contrib.auth.forms import PasswordChangeForm,SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from MZXT.models import FieldCls
+from DRMXT.models import LogCls
+from RZSQ.models import SeqCls, RecordCls
 from vmaig_comments.models import Comment
 from vmaig_auth.models import VmaigUser
 from vmaig_auth.forms import VmaigUserCreationForm,VmaigPasswordRestForm
@@ -64,15 +66,33 @@ class MzxtView(BaseMixin,ListView):
             tablename = sendinfo['tablename']
             rowinfo = sendinfo['rows']
             time_now = datetime.datetime.now()
+            count=0
+            record = ''
             for row in rowinfo:
+                count=count+1
                 res = FieldCls.objects.create(  tablename = tablename,\
                                                 field_name = row['name'],\
                                                 field_type = row['type'],\
                                                 create_time = time_now
                                               )
+                record = record + row['name'] + ':' + row['type'] + ','
+            LogCls.objects.create(
+                app_name = u'媒资系统',
+                add_content = record[:-1],
+                operator =  '创建表【%s】，并添加了%d个字段'  %(tablename, count),
+                create_time = time_now
+                )
         # comment_list = MzxtCls.objects.all()
         else:
             res = FieldCls.objects.filter(tablename=fname).delete()
+            RecordCls.objects.filter(tablename=fname).delete()
+            LogCls.objects.create(
+                app_name = u'媒资系统',
+                add_content = fname,
+                operator =  '删除了表【%s】'  %(fname),
+                create_time = datetime.datetime.now()
+                )
+
             print res
         mydict = {"errors":''}
         return HttpResponse(json.dumps(mydict),content_type="application/json")

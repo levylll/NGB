@@ -13,6 +13,7 @@ from django.contrib.auth.forms import PasswordChangeForm,SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from MZXT.models import FieldCls
 from RZSQ.models import SeqCls, RecordCls
+from DRMXT.models import LogCls
 from vmaig_comments.models import Comment
 from vmaig_auth.models import VmaigUser
 from vmaig_auth.forms import VmaigUserCreationForm,VmaigPasswordRestForm
@@ -70,20 +71,31 @@ class RZSQView(BaseMixin,ListView):
         return tablelist
 
     def insert_record(self, table, row_list):
+        cnt = 0
         for elem in row_list:
-            print '++++++'
-            print elem
             time_now = datetime.datetime.now()
             seq = SeqCls.objects.create(create_time=time_now)
-            cnt = 0
+            cnt += 1
             for col, content in elem.items():
                 RecordCls.objects.create(rowkey=seq.id, tablename=table, field_name=col, content=content, create_time=time_now)
-                cnt += 1
-        return cnt
 
-    def clear_one(self, row_key):
+        LogCls.objects.create(
+            app_name = u'媒资系统管理',
+            add_content = row_list,
+            operator = '在【%s】中添加了%d条记录'  %(table, cnt),
+            create_time = time_now
+        )
+        return cnt
+    def clear_one(self,table_name,row_key):
+        print table_name
         try:
             RecordCls.objects.filter(rowkey=row_key).delete()
+            LogCls.objects.create(
+            app_name = u'媒资系统管理',
+            add_content = row_key,
+            operator =  '在【%s】中删除了一条记录'  %(table_name),
+            create_time =  datetime.datetime.now()
+        )
         except Exception, err:
             print 'error %s' %str(err)
         return row_key
@@ -91,6 +103,12 @@ class RZSQView(BaseMixin,ListView):
     def clear_all(self, table):
         try:
             RecordCls.objects.filter(tablename=table).delete()
+            LogCls.objects.create(
+            app_name = u'媒资系统管理',
+            add_content = table,
+            operator = '清空了表【%s】'  %(table),
+            create_time =  datetime.datetime.now()
+        )
         except Exception, err:
             print 'error %s' %str(err)
         return table
@@ -98,9 +116,13 @@ class RZSQView(BaseMixin,ListView):
     def post(self, request, *args, **kwargs):
         #获取评论
         operate = self.request.POST.get("operate","")
+        print operate
         if operate == 'delete_one':
             rowkey = self.request.POST.get("rowkey","")
-            self.clear_one(rowkey)
+            table = self.request.POST.get("tablename","")
+            print '======='
+            print table
+            self.clear_one(table,rowkey)
         elif operate == 'add':
             sendInfo = self.request.POST.get("sendInfo","")
             senddict = json.loads(sendInfo)

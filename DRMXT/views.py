@@ -19,7 +19,7 @@ from vmaig_blog.settings import PAGE_NUM
 import datetime,time
 import json
 import logging
-from django_extlog.models import ExtLog
+#from django_extlog.models import ExtLog
 
 #缓存
 try:
@@ -42,12 +42,13 @@ class DRMXTView(BaseMixin,ListView):
     context_object_name = 'comment_list'
     def get_context_data(self,**kwargs):
         #轮播
-        buf = LogCls.objects.all()
-        kwargs['comment_list'] = buf[:5]
+        log_list = LogCls.objects.all()[:5]
+        #print res
+        kwargs['comment_list'] = log_list
         return super(DRMXTView,self).get_context_data(**kwargs)
 
     def get_queryset(self):
-        comment_list = ExtLog.objects.all()[:5]
+        comment_list = LogCls.objects.all()[:5]
         return comment_list
 
         mydict = {"errors":""}

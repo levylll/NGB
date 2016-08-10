@@ -7,39 +7,43 @@
             <form id="vmaig-comment-form" method="post" role="form">
                 {% csrf_token %}
                 <!--<textarea id="comment" name="comment" class="form-control" rows="1" placeholder="请输入信息 限200字!"></textarea>-->
-                表名:
+                <h5>表名:
                     <select id='select-table' onchange="location = this.value;">
                         <option selected value={{cur_table}}>{{cur_table}}</option>
                         {% for table in table_list %}
                         <option value="/rzsq/{{table}}.html">{{ table}}</option>
                         {% endfor %}
                     </select>
+                </h5>
                 </br>
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                     添加内容
                 </button>
-                </br>
+
                 <button type="button" class="btn btn-danger" onclick="cleartable()">清空表格内容</button>
-            </form>
-            <div name="mytable">
-                {{cur_table}}
+            </form><br/>
+            <div name="mytable"  style="background-color: #81cef9;padding:1px;margin-bottom: 10px;">
+               <h5> 表名： {{cur_table}}</h5>
             </div>
             <div>
                 {% for rowkey, record in records.items%}
                 <div name={{rowkey}} style='border: 2px solid;; border-radius:25px;'>
                         {% for field_name, field_content in record.items%}
-                            <div>
-                            <div class="label label-info">{{field_name}}</div>
+                           <br/> <div>
+                           &nbsp; <div class="label label-info">{{field_name}}</div>&nbsp;
                             {{field_content}}
                             </div>
+
                         {%endfor%}
-                        <button type="button" class="btn btn-warning delete-record" onclick="deleteRecord({{ rowkey }})">删除记录</button>
-                    </div>
+                         <br/>
+                       &nbsp; &nbsp;<button type="button" class="btn btn-warning delete-record" style="justify-content: center;align-content: center" onclick="deleteRecord({{ rowkey }})">删除记录</button>
+                    <br/><br/></div>
+                    <br/>
                 {%endfor%}
             </div>
         </div>
     </div>
-</div>
+
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
     <div class="modal-dialog" role="document" style="top:200px">
@@ -61,8 +65,9 @@
                             <input type="text" placeholder={{col}} class="label-content">
                     </div>
                 {% endfor %}
-                    <div > 
-                        <button type="button" class="btn btn-warning delete-rule" >删除规则</button>
+             <br/>
+                    <div >
+                        <button type="button" class="btn btn-warning delete-rule" style="margin-right: 100px">删除规则</button>
                     </div>
             </div>
 
@@ -76,7 +81,7 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary pull-left" onclick='addRule()'>添加字段</button>
+                <button type="button" class="btn btn-primary pull-left" onclick='addRule()'>添加记录</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
                  <button type="button" class="btn btn-success" onclick='submit()'>提交</button>
                 <!--<button type="button" class="btn btn-primary" id="chgstatus_btn" onclick="chgstatus_btn()">确定</button>-->
@@ -168,11 +173,12 @@
             });
     }
     function deleteRecord(rowkey){
+         var table = $("#select-table").find("option:selected").text();
          $.ajax({
                 type: "POST",
                 url: "/rzsq/",
                 dataType: "json",
-                data: {operate:"delete_one",rowkey:rowkey},
+                data: {operate:"delete_one",tablename:table,rowkey:rowkey},
            beforeSend:function(xhr){
                 xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
             },

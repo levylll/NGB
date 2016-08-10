@@ -9,11 +9,12 @@
                     创建新表
                 </button>
             </div>
+            <br/>
             <form id="vmaig-comment-form" method="post" role="form">
                 {% csrf_token %}
                 <!--<textarea id="comment" name="comment" class="form-control" rows="1" placeholder="请输入信息 限200字!"></textarea>-->
-                表名:  <input type="text" name="fname" autofocus><br>
-                <button type="submit" class="btn">删除</button>
+               <h5>表名:   <input type="text" name="fname" autofocus >       <button type="submit" class="btn" style="background-color: #EE5757;color: #000;">删除</button></h5><br>
+
             </form>
         </div>
     </div>
@@ -47,13 +48,13 @@
         <div class='rules'>
             <a href='/dashboard/user-profile-select-overview/' type='button' class='btn btn-default' style='float: right;'>返回</a>
             <div class="input-group">
-                <span class="input-group-addon" id="basic-addon1">表名</span>
+                <span class="input-group-addon" id="basic-addon1">表名</span>&nbsp;
                 <input type="text" class="table-name" placeholder="表名" aria-describedby="basic-addon1">
-            </div>
+            </div><br/>
             <div class="row">
                 <div class="col-md-2"><span class="label label-info">字段名称</span></div>
                 <div class="col-md-3"><span class="label label-info">字段类型</span></div>
-            </div>
+            </div><br/>
             <div class='one-rule'>
                 <div class='row'>
                     <div class="colname col-md-2"><input type="text" placeholder="colname"></div>
